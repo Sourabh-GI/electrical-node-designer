@@ -10,7 +10,7 @@
   <HighResolutionIconUrl DefaultValue="D:\Goodly Insights\GI_Projects - Documents\23_Engineering Solutions_Elect Load Planning tool\01_Project\Electrical_Node_Designer\Electrical Node Designer\assets\NodeDesigner.png"/>
   <SupportUrl DefaultValue="https://goodlyinsights.sharepoint.com/sites/ElectricalNodeDesigner/"/>
   <AppDomains>
-    <AppDomain>https://www.goodlyinsights.com</AppDomain>
+    <AppDomain>https://goodlyinsights.sharepoint.com</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Workbook"/>

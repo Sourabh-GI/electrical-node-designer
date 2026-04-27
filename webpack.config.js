@@ -5,7 +5,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const urlDev  = "https://localhost:3000/";
-const urlProd = "https://sourabh-gi.github.io/electrical-node-designer/";
+const urlProd = "https://goodlyinsights.sharepoint.com/sites/ElectricalNodeDesigner/AddInFiles/";
 
 async function getHttpsOptions() {
   const httpsOptions = await devCerts.getHttpsServerOptions();
