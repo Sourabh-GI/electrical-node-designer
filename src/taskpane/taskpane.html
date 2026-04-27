@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Electrical Node Designer</title>
+  <link rel="stylesheet" href="taskpane.css" />
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js" type="text/javascript"></script>
+</head>
+<body>
+
+  <div id="sideload-msg" style="display:none;">
+    <h2>Please sideload this add-in to see the app body.</h2>
+  </div>
+
+  <div id="app-body" style="display:block;">
+
+    <!-- Palette -->
+    <div id="palette">
+      <div class="palette-section tool-section">
+        <button id="btn-select"  class="tool-btn active" onclick="switchTool('select')">Select</button>
+        <button id="btn-connect" class="tool-btn"        onclick="switchTool('connect')">Connect</button>
+      </div>
+      <div class="palette-section equip-section">
+        <button class="equip-btn source-btn" onclick="addNode('Source')">Source</button>
+        <button class="equip-btn db-btn"     onclick="addNode('DB')">DB</button>
+        <button class="equip-btn dc-btn"     onclick="addNode('DC')">DC</button>
+        <button class="equip-btn tx-btn"     onclick="addNode('TX')">TX</button>
+        <button class="equip-btn pb-btn"     onclick="addNode('PB')">PB</button>
+      </div>
+    </div>
+
+    <!-- Canvas container -->
+    <div id="canvas-container">
+
+      <!-- Zoom toolbar -->
+      <div id="zoom-toolbar">
+        <button onclick="zoomOut()">&#8722;</button>
+        <button id="zoom-label" onclick="zoomReset()">100%</button>
+        <button onclick="zoomIn()">+</button>
+        <button onclick="resetView()">&#8634;</button>
+      </div>
+
+      <!-- SVG canvas -->
+      <svg id="canvas" width="100%" height="100%">
+        <defs></defs>
+        <g id="viewport">
+          <g id="connections"></g>
+          <g id="nodes"></g>
+          <g id="temp-connections"></g>
+        </g>
+      </svg>
+
+      <!-- Connection delete popup -->
+      <div id="conn-delete-popup">
+        <button onclick="deleteSelectedConnection()">Delete Connection</button>
+        <button onclick="hideConnDeletePopup()">Cancel</button>
+      </div>
+
+    </div>
+
+    <!-- Resize handle -->
+    <div id="resize-handle"><span class="resize-dots">&#xB7; &#xB7; &#xB7;</span></div>
+
+    <!-- Bottom panel -->
+    <div id="bottom-panel">
+
+      <!-- Properties panel (hidden by default, JS builds content) -->
+      <div id="properties-panel"></div>
+
+      <!-- Export panel (hidden by default) -->
+      <div id="export-panel">
+        <label>Sheet:
+          <select id="export-sheet-select"></select>
+        </label>
+        <label>Table Name:
+          <input id="export-table-name" type="text" value="NodeHierarchy" />
+        </label>
+        <div class="panel-actions">
+          <button onclick="cancelExport()">Cancel</button>
+          <button class="primary-btn" onclick="confirmExport()">Export</button>
+        </div>
+      </div>
+
+      <!-- Load panel (hidden by default) -->
+      <div id="load-panel">
+        <label>Table Name:
+          <input id="load-table-name" type="text" value="NodeHierarchy" />
+        </label>
+        <div class="panel-actions">
+          <button onclick="cancelLoad()">Cancel</button>
+          <button class="primary-btn" onclick="confirmLoad()">Load</button>
+        </div>
+      </div>
+
+      <!-- Actions bar -->
+      <div id="actions">
+        <button onclick="clearCanvas()">Clear</button>
+        <button onclick="exportToExcel()">Generate Table</button>
+        <button onclick="loadFromExcel()">Load from Excel</button>
+        <span id="conn-counter">Connections: 0</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast"></div>
+
+  <script src="taskpane.js" type="text/javascript"></script>
+</body>
+</html>
