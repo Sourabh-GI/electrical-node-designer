@@ -3,9 +3,8 @@
 const devCerts = require("office-addin-dev-certs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-const urlDev  = "https://localhost:3000/";
-const urlProd = "https://goodlyinsights.sharepoint.com/sites/ElectricalNodeDesigner/AddInFiles/";
 
 async function getHttpsOptions() {
   const httpsOptions = await devCerts.getHttpsServerOptions();
@@ -24,6 +23,7 @@ module.exports = async (env, options) => {
     output: {
       filename: "[name].js", // fixed names — no contenthash
       clean: true,           // remove old output files on each build
+      publicPath: dev ? "https://localhost:3000/" : "https://goodlyinsights.sharepoint.com/sites/ElectricalNodeDesigner/AddInFiles/",
     },
     resolve: {
       extensions: [".html", ".js"],
@@ -36,6 +36,10 @@ module.exports = async (env, options) => {
           use: {
             loader: "babel-loader",
           },
+        },
+        {
+          test: /\.css$/,
+          use: [MiniCssExtractPlugin.loader, "css-loader"],
         },
         {
           test: /\.html$/,
@@ -63,6 +67,9 @@ module.exports = async (env, options) => {
       ],
     },
     plugins: [
+      new MiniCssExtractPlugin({
+        filename: "taskpane.css",
+      }),
       new HtmlWebpackPlugin({
         filename: "taskpane.html",
         template: "./src/taskpane/taskpane.html",
@@ -78,24 +85,14 @@ module.exports = async (env, options) => {
       new CopyWebpackPlugin({
         patterns: [
           {
-            // CSS shipped as a plain static file — no bundling needed
-            from: "src/taskpane/taskpane.css",
-            to: "taskpane.css",
-          },
-          {
             from: "assets/*",
             to: "assets/[name][ext][query]",
           },
           {
-            from: "manifest*.xml",
-            to: "[name][ext]",
-            transform(content) {
-              if (dev) {
-                return content;
-              } else {
-                return content.toString().replace(new RegExp(urlDev, "g"), urlProd);
-              }
-            },
+            // Dev: copy manifest-dev.xml (localhost:3000 URLs)
+            // Prod: copy manifest.xml (SharePoint URLs)
+            from: dev ? "manifest-dev.xml" : "manifest.xml",
+            to: "manifest.xml",
           },
         ],
       }),
