@@ -1,4 +1,8 @@
 node_modules/
 dist/
+.webpack/
 .env
 *.log
+.DS_Store
+Thumbs.db
+installer/certs/

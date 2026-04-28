@@ -1,0 +1,526 @@
+/* ── RESET ────────────────────────────────────────────────────────────────── */
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 13px;
+  color: #333;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* ── APP BODY ─────────────────────────────────────────────────────────────── */
+#app-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── PALETTE ──────────────────────────────────────────────────────────────── */
+#palette {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: #ffffff;
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+}
+
+.palette-section {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Tool buttons */
+.tool-btn {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.tool-btn:hover:not(.active) {
+  background: #f0f0f0;
+}
+
+.tool-btn.active {
+  background: #e65100;
+  color: #fff;
+  border-color: #e65100;
+}
+
+/* Equipment buttons */
+.equip-btn {
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.equip-btn:hover { opacity: 0.85; }
+
+.source-btn { background: #2e7d32; }
+.db-btn     { background: #1565c0; }
+.dc-btn     { background: #0277bd; }
+.tx-btn     { background: #555555; }
+.pb-btn     { background: #e65100; }
+
+/* ── CANVAS CONTAINER ─────────────────────────────────────────────────────── */
+#canvas-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #fafafa;
+  /* height is set explicitly by initCanvas() via resize handle */
+}
+
+/* ── SVG CANVAS ───────────────────────────────────────────────────────────── */
+#canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+
+body.tool-connect #canvas {
+  cursor: crosshair;
+}
+
+/* ── ZOOM TOOLBAR ─────────────────────────────────────────────────────────── */
+#zoom-toolbar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.93);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+#zoom-toolbar button {
+  padding: 3px 7px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 3px;
+  min-width: 24px;
+  line-height: 1.4;
+  color: #444;
+}
+
+#zoom-toolbar button:hover { background: #e8e8e8; }
+
+#zoom-label {
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 42px;
+  text-align: center;
+  cursor: pointer;
+  padding: 3px 4px;
+  border-radius: 3px;
+  color: #555;
+  border: none;
+  background: transparent;
+}
+
+#zoom-label:hover { background: #e8e8e8; }
+
+/* ── CONNECTION DELETE POPUP ──────────────────────────────────────────────── */
+#conn-delete-popup {
+  position: absolute;
+  display: none;
+  z-index: 20;
+  gap: 4px;
+  transform: translate(-50%, calc(-100% - 6px));
+  pointer-events: all;
+}
+
+#conn-delete-popup button {
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+#conn-delete-popup button:first-child {
+  background: #d32f2f;
+  color: #fff;
+}
+
+#conn-delete-popup button:first-child:hover { background: #b71c1c; }
+
+#conn-delete-popup button:last-child {
+  background: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+#conn-delete-popup button:last-child:hover { background: #f0f0f0; }
+
+/* ── RESIZE HANDLE ────────────────────────────────────────────────────────── */
+#resize-handle {
+  flex-shrink: 0;
+  height: 6px;
+  background: #e0e0e0;
+  cursor: row-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+#resize-handle:hover { background: #bdbdbd; }
+
+.resize-dots {
+  color: #9e9e9e;
+  font-size: 10px;
+  letter-spacing: 4px;
+  line-height: 1;
+}
+
+/* ── BOTTOM PANEL ─────────────────────────────────────────────────────────── */
+#bottom-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* ── PROPERTIES PANEL ─────────────────────────────────────────────────────── */
+#properties-panel {
+  display: none;
+  flex-direction: column;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  max-height: 200px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+#properties-panel.visible { display: flex; }
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: #f9f9f9;
+  border-bottom: 1px solid #eee;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.panel-title-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.collapse-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  color: #888;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.collapse-btn:hover { color: #333; }
+
+#props-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+}
+
+.prop-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.prop-row label {
+  font-size: 11px;
+  color: #555;
+}
+
+.prop-row input {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12px;
+  width: 100%;
+}
+
+#delete-node-btn {
+  margin-top: 4px;
+  padding: 5px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #c62828;
+  width: 100%;
+}
+
+#delete-node-btn:hover { background: #ffebee; }
+
+/* ── EXPORT PANEL ─────────────────────────────────────────────────────────── */
+#export-panel {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+#export-panel.visible { display: flex; }
+
+#export-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: #555;
+}
+
+#export-panel input,
+#export-panel select {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12px;
+  width: 100%;
+}
+
+/* ── LOAD PANEL ───────────────────────────────────────────────────────────── */
+#load-panel {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  flex-shrink: 0;
+}
+
+#load-panel.visible { display: flex; }
+
+#load-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: #555;
+}
+
+#load-panel input {
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 12px;
+  width: 100%;
+}
+
+/* ── PANEL ACTIONS ────────────────────────────────────────────────────────── */
+.panel-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.panel-actions button {
+  padding: 5px 12px;
+  font-size: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.panel-actions button:hover { background: #f0f0f0; }
+
+.panel-actions .primary-btn {
+  background: #1565c0;
+  color: #fff;
+  border-color: #1565c0;
+}
+
+.panel-actions .primary-btn:hover { background: #0d47a1; }
+
+/* ── ACTIONS BAR ──────────────────────────────────────────────────────────── */
+#actions {
+  display: flex;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #fff;
+  border-top: 1px solid #ddd;
+  align-items: center;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+#actions button {
+  padding: 5px 10px;
+  font-size: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+#actions button:hover { background: #f0f0f0; }
+
+#conn-counter {
+  font-size: 11px;
+  color: #777;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+/* ── SVG NODE STYLES ──────────────────────────────────────────────────────── */
+.node-group {
+  cursor: grab;
+}
+
+.node-group:active {
+  cursor: grabbing;
+}
+
+body.tool-connect .node-group {
+  cursor: crosshair;
+}
+
+.node-label {
+  fill: #fff;
+  font-size: 11px;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-weight: 600;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* node-selected: yellow dashed stroke */
+.node-selected .node-rect,
+.node-selected .node-circle {
+  stroke: #ffd600 !important;
+  stroke-width: 3px !important;
+  stroke-dasharray: 5 3 !important;
+}
+
+/* Connect handle dot — hidden by default, shown on hover in connect mode */
+.connect-handle {
+  fill: #4caf50;
+  stroke: #fff;
+  stroke-width: 2;
+  opacity: 0;
+  pointer-events: none;
+  cursor: crosshair;
+  transition: opacity 0.15s;
+}
+
+body.tool-connect .node-group:hover .connect-handle {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Hover target highlight while dragging connection */
+.node-connect-target .node-rect,
+.node-connect-target .node-circle {
+  stroke: #4caf50 !important;
+  stroke-width: 3px !important;
+  stroke-dasharray: none !important;
+}
+
+/* ── CONNECTOR LINES ──────────────────────────────────────────────────────── */
+.connector {
+  stroke: #455a64;
+  stroke-width: 1.5;
+  fill: none;
+  pointer-events: none;
+}
+
+.connector-selected {
+  stroke: #d32f2f !important;
+  stroke-width: 2.5 !important;
+}
+
+.connector-temp {
+  stroke: #546e7a;
+  stroke-width: 1.5;
+  stroke-dasharray: 6 3;
+  fill: none;
+  pointer-events: none;
+}
+
+.connector-hit {
+  stroke: transparent;
+  stroke-width: 12;
+  fill: none;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* ── TOAST ────────────────────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: #323232;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 100;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+
+/*# sourceMappingURL=taskpane.css.map*/
